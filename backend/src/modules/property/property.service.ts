@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Property, PropertyDocument } from './schemas/property.schema';
@@ -71,4 +71,26 @@ export class PropertyService {
       .find({ location: { $regex: location, $options: 'i' } }) // case-insensitive search
       .exec();
   }
+
+  async findByFilters(filters: { location?: string; status?: string; type?: string }) {
+    const query: any = {};
+  
+    if (filters.location) {
+      query.location = filters.location;
+    }
+    if (filters.status) {
+      query.status = filters.status;
+    }
+    if (filters.type) {
+      query.type = filters.type;
+    }
+  
+    try {
+      return await this.propertyModel.find(query).exec();
+    } catch (error) {
+      console.error('Error fetching properties with filters:', error);
+      throw new InternalServerErrorException('Error fetching properties');
+    }
+  }
+  
 }

@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { PropertyService } from './property.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 
@@ -8,7 +17,7 @@ export class PropertyController {
   test() {
     return { message: 'Test endpoint working' };
   }
-  
+
   constructor(private readonly propertyService: PropertyService) {}
 
   @Post()
@@ -22,8 +31,12 @@ export class PropertyController {
   }
 
   @Get('search')
-  findByLocation(@Query('location') location: string) {
-    return this.propertyService.findByLocation(location);
+  findByFilters(
+    @Query('location') location?: string,
+    @Query('status') status?: string,
+    @Query('type') type?: string,
+  ) {
+    return this.propertyService.findByFilters({ location, status, type });
   }
 
   @Get(':id')
@@ -32,7 +45,10 @@ export class PropertyController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updatePropertyDto: Partial<CreatePropertyDto>) {
+  update(
+    @Param('id') id: string,
+    @Body() updatePropertyDto: Partial<CreatePropertyDto>,
+  ) {
     return this.propertyService.update(id, updatePropertyDto);
   }
 

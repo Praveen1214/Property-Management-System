@@ -48,11 +48,26 @@ export const deleteProperty = createAsyncThunk(
 
 export const searchProperties = createAsyncThunk(
   'properties/search',
-  async (location: string) => {
-    const response = await axios.get<Property[]>(`${API_URL}/search?location=${location}`);
+  async (filters: { location?: string; status?: string; type?: string }) => {
+    const { location, status, type } = filters;
+    
+    // Build the query string
+    const query = new URLSearchParams();
+    if (location) query.append('location', location);
+    if (status) query.append('status', status);
+    if (type) query.append('type', type);
+
+    // Log the generated URL for debugging
+    const url = `${API_URL}/search?${query.toString()}`;
+    console.log("Request URL:", url);
+
+    const response = await axios.get<Property[]>(url);
     return response.data;
   }
 );
+
+
+
 
 const propertySlice = createSlice({
   name: 'properties',

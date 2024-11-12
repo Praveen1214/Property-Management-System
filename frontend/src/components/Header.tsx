@@ -1,6 +1,7 @@
-// src/components/Header.tsx
-import React from 'react';
-import Link from 'next/link';
+"use client"
+
+import React from "react";
+import Link from "next/link";
 
 export const Header = () => {
   return (
@@ -24,4 +25,3 @@ export const Header = () => {
     </header>
   );
 };
-

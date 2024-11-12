@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchProperties } from '@/store/features/propertySlice';
 import HomeSearch from '@/components/HomeSearch';
@@ -9,12 +9,22 @@ import PropertyCard from '@/components/PropertyCard';
 export default function Home() {
   const dispatch = useAppDispatch();
   const { items: properties, status } = useAppSelector((state) => state.properties);
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
 
   useEffect(() => {
     if (status === 'idle') {
       dispatch(fetchProperties());
     }
   }, [dispatch, status]);
+
+  // Calculate total pages and the properties to display on the current page
+  const totalPages = Math.ceil(properties.length / itemsPerPage);
+  const displayedProperties = properties.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <main className="min-h-screen bg-white">
@@ -23,7 +33,7 @@ export default function Home() {
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ 
-            backgroundImage: 'url("/images/hero-bg.png")', // Update this path to match your image
+            backgroundImage: 'url("/images/hero-bg.png")',
             filter: 'brightness(0.7)'
           }}
         />
@@ -42,8 +52,8 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {status === 'loading' && <p>Loading properties...</p>}
-          {status === 'succeeded' && properties.length > 0 ? (
-            properties.map((property) => (
+          {status === 'succeeded' && displayedProperties.length > 0 ? (
+            displayedProperties.map((property) => (
               <PropertyCard key={property._id} property={property} />
             ))
           ) : (
@@ -53,23 +63,29 @@ export default function Home() {
 
         {/* Pagination */}
         <div className="flex justify-center items-center mt-8 gap-2">
-          <span className="text-sm text-gray-600">Total {properties.length} items</span>
+          <span className="text-sm text-gray-600">Page {currentPage} of {totalPages}</span>
           <div className="flex gap-1">
-            {[1, 2, 3, 4].map((page) => (
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 rounded bg-gray-100 text-gray-600 hover:bg-gray-200"
+            >
+              ←
+            </button>
+            {[...Array(totalPages)].map((_, index) => (
               <button
-                key={page}
+                key={index + 1}
+                onClick={() => setCurrentPage(index + 1)}
                 className={`px-3 py-1 rounded ${
-                  page === 1
+                  currentPage === index + 1
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                {page}
+                {index + 1}
               </button>
             ))}
-            <button className="px-3 py-1 rounded bg-gray-100 text-gray-600 hover:bg-gray-200">
-              →
-            </button>
+            
           </div>
         </div>
       </section>
