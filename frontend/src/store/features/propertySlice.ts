@@ -1,82 +1,92 @@
+// src/store/features/propertySlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-
-export interface Property {
-  id: string;
-  title: string;
-  location: string;
-  price: number;
-  squareFt: number;
-  type: string;
-  status: string;
-  image: string;
-}
+import { Property } from '@/types/property.types';
 
 interface PropertyState {
-  properties: Property[];
-  loading: boolean;
+  items: Property[];
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
-  filters: {
-    status: string;
-    type: string;
-    location: string;
-    minPrice: number | null;
-    maxPrice: number | null;
-  };
 }
 
 const initialState: PropertyState = {
-  properties: [],
-  loading: false,
+  items: [],
+  status: 'idle',
   error: null,
-  filters: {
-    status: '',
-    type: '',
-    location: '',
-    minPrice: null,
-    maxPrice: null,
-  },
 };
 
-export const fetchProperties = createAsyncThunk(
-  'properties/fetchProperties',
-  async (_, { getState, rejectWithValue }) => {
-    try {
-      const { filters } = getState() as { property: PropertyState };
-      const response = await axios.get('http://localhost:3000/properties', {
-        params: filters,
-      });
-      return response.data;
-    } catch (error) {
-      return rejectWithValue('Failed to fetch properties');
-    }
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/properties';
+
+export const fetchProperties = createAsyncThunk('properties/fetchAll', async () => {
+  const response = await axios.get<Property[]>(API_URL);
+  return response.data;
+});
+
+export const addProperty = createAsyncThunk(
+  'properties/add',
+  async (propertyData: Omit<Property, '_id' | 'createdAt' | 'updatedAt'>) => {
+    const response = await axios.post<Property>(API_URL, propertyData);
+    return response.data;
+  }
+);
+
+export const updateProperty = createAsyncThunk(
+  'properties/update',
+  async ({ id, data }: { id: string; data: Partial<Property> }) => {
+    const response = await axios.put<Property>(`${API_URL}/${id}`, data);
+    return response.data;
+  }
+);
+
+export const deleteProperty = createAsyncThunk(
+  'properties/delete',
+  async (id: string) => {
+    await axios.delete(`${API_URL}/${id}`);
+    return id;
+  }
+);
+
+export const searchProperties = createAsyncThunk(
+  'properties/search',
+  async (location: string) => {
+    const response = await axios.get<Property[]>(`${API_URL}/search?location=${location}`);
+    return response.data;
   }
 );
 
 const propertySlice = createSlice({
-  name: 'property',
+  name: 'properties',
   initialState,
-  reducers: {
-    setFilters: (state, action) => {
-      state.filters = { ...state.filters, ...action.payload };
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchProperties.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+        state.status = 'loading';
       })
       .addCase(fetchProperties.fulfilled, (state, action) => {
-        state.loading = false;
-        state.properties = action.payload;
+        state.status = 'succeeded';
+        state.items = action.payload;
       })
       .addCase(fetchProperties.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
+        state.status = 'failed';
+        state.error = action.error.message || null;
+      })
+      .addCase(addProperty.fulfilled, (state, action) => {
+        state.items.push(action.payload);
+      })
+      .addCase(updateProperty.fulfilled, (state, action) => {
+        const index = state.items.findIndex(item => item._id === action.payload._id);
+        if (index !== -1) {
+          state.items[index] = action.payload;
+        }
+      })
+      .addCase(deleteProperty.fulfilled, (state, action) => {
+        state.items = state.items.filter(item => item._id !== action.payload);
+      })
+      .addCase(searchProperties.fulfilled, (state, action) => {
+        state.items = action.payload;
       });
   },
 });
 
-export const { setFilters } = propertySlice.actions;
 export default propertySlice.reducer;

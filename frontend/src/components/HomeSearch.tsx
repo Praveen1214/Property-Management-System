@@ -1,62 +1,65 @@
-'use client'
-import { useDispatch, useSelector } from 'react-redux';
-import { setFilters, fetchProperties } from '@/store/features/propertySlice';
-import type { AppDispatch, RootState } from '@/store';
+import { useState } from 'react';
+import { useAppDispatch } from '@/store/hooks';
+import { searchProperties } from '@/store/features/propertySlice';
 
-export const HomeSearch = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const filters = useSelector((state: RootState) => state.property.filters);
+const HomeSearch = () => {
+  const dispatch = useAppDispatch();
+  const [location, setLocation] = useState('All Main Locations');
+  const [status, setStatus] = useState('All Status');
+  const [type, setType] = useState('All Types');
 
   const handleSearch = () => {
-    dispatch(fetchProperties());
+    if (location !== 'All Main Locations') {
+      dispatch(searchProperties(location));
+    }
   };
 
   return (
     <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg p-2">
+      
       <div className="flex flex-col md:flex-row gap-2">
+      <div className="flex-1">
         <select
-          className="flex-1 p-3 border rounded-md"
-          value={filters.location}
-          onChange={(e) => dispatch(setFilters({ location: e.target.value }))}
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          className="w-full p-3 border rounded-md"
         >
-          <option value="">All Main Locations</option>
-          <option value="New York">New York</option>
-          <option value="Los Angeles">Los Angeles</option>
-          <option value="Chicago">Chicago</option>
-          <option value="Houston">Houston</option>
-          <option value="Phoenix">Phoenix</option>
-          <option value="Philadelphia">Philadelphia</option>
-          <option value="San Antonio">San Antonio</option>
+          <option>All Main Locations</option>
+          <option>Colombo</option>
+          <option>Kandy</option>
+          <option>Galle</option>
         </select>
-        
+        </div>
+        <div className="flex-1">
         <select
-          className="flex-1 p-3 border rounded-md"
-          value={filters.status}
-          onChange={(e) => dispatch(setFilters({ status: e.target.value }))}
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className="w-full p-3 border rounded-md"
         >
-          <option value="">All Status</option>
-          <option value="For Sale">For Sale</option>
-          <option value="For Rent">For Rent</option>
+          <option>All Status</option>
+          <option>For Sale</option>
+          <option>For Rent</option>
         </select>
-
+        </div>
+        <div className="flex-1">
         <select
-          className="flex-1 p-3 border rounded-md"
-          value={filters.type}
-          onChange={(e) => dispatch(setFilters({ type: e.target.value }))}
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+          className="w-full p-3 border rounded-md"
         >
-          <option value="">All Types</option>
-          <option value="Single Family">Single Family</option>
-          <option value="Apartment">Apartment</option>
-          <option value="Condo">Condo</option>
+          <option>All Types</option>
+          <option>Single Family</option>
+          <option>Villa</option>
         </select>
-
+        </div>
         <button
           onClick={handleSearch}
-          className="bg-blue-600 text-white px-6 py-3 rounded-md"
-        >
+          className="bg-blue-600 text-white px-6 py-3 rounded-md flex items-center justify-center" >
           Search
         </button>
       </div>
     </div>
   );
 };
+
+export default HomeSearch;

@@ -4,6 +4,11 @@ import { CreatePropertyDto } from './dto/create-property.dto';
 
 @Controller('properties')
 export class PropertyController {
+  @Get('test')
+  test() {
+    return { message: 'Test endpoint working' };
+  }
+  
   constructor(private readonly propertyService: PropertyService) {}
 
   @Post()

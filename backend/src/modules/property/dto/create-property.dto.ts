@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsEnum, IsNotEmpty } from 'class-validator';
+import { IsString, IsNumber, IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreatePropertyDto {
   @IsString()
@@ -10,10 +10,11 @@ export class CreatePropertyDto {
   image: string;
 
   @IsString()
-  @IsNotEmpty()
-  slug: string;
+  @IsOptional()  // Make slug optional
+  slug?: string;  // Add ? to make it optional in TypeScript
 
   @IsEnum(['Colombo', 'Kandy', 'Galle'])
+  @IsNotEmpty()
   location: string;
 
   @IsString()
@@ -21,14 +22,18 @@ export class CreatePropertyDto {
   description: string;
 
   @IsNumber()
+  @IsNotEmpty()
   price: number;
 
   @IsEnum(['Single Family', 'Villa'])
+  @IsNotEmpty()
   propertyType: string;
 
   @IsEnum(['For Sale', 'For Rent'])
+  @IsNotEmpty()
   status: string;
 
   @IsNumber()
+  @IsNotEmpty()
   area: number;
 }

@@ -1,15 +1,30 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-@Schema({ timestamps: true })
-export class Property extends Document {
+@Schema({
+  timestamps: true, // This will add createdAt and updatedAt fields
+})
+export class Property {
   @Prop({ required: true })
   title: string;
 
   @Prop({ required: true })
   image: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ 
+    required: true,
+    unique: true,  // This ensures uniqueness
+    // Add this if you want to auto-generate the slug from title
+    set: (value: string) => {
+      if (!value) {
+        return value;
+      }
+      return value
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '');
+    }
+  })
   slug: string;
 
   @Prop({ required: true, enum: ['Colombo', 'Kandy', 'Galle'] })
@@ -31,4 +46,17 @@ export class Property extends Document {
   area: number;
 }
 
+export type PropertyDocument = Property & Document;
+
 export const PropertySchema = SchemaFactory.createForClass(Property);
+
+// Add this to automatically generate slug from title if slug is not provided
+PropertySchema.pre('save', function(next) {
+  if (!this.slug && this.title) {
+    this.slug = this.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+  }
+  next();
+});
