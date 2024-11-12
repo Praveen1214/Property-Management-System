@@ -50,7 +50,6 @@ export type PropertyDocument = Property & Document;
 
 export const PropertySchema = SchemaFactory.createForClass(Property);
 
-// Add this to automatically generate slug from title if slug is not provided
 PropertySchema.pre('save', function(next) {
   if (!this.slug && this.title) {
     this.slug = this.title
