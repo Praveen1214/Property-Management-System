@@ -18,6 +18,7 @@ const AddProperty = () => {
     landSize: "",
   });
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ type: "", text: "" });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -28,18 +29,11 @@ const AddProperty = () => {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handleLocationChange = (e) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      location: e.target.value,
-    }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setMessage({ type: "", text: "" });
 
-    // Ensure price and area are sent as numbers
     const propertyData = {
       ...formData,
       price: Number(formData.price),
@@ -53,7 +47,7 @@ const AddProperty = () => {
     try {
       await dispatch(addProperty(propertyData)).unwrap();
       setLoading(false);
-      alert("Property added successfully!");
+      setMessage({ type: "success", text: "Property added successfully!" });
       setFormData({
         title: "",
         image: "",
@@ -65,16 +59,31 @@ const AddProperty = () => {
         area: "",
         landSize: "",
       });
+
+      window.location.href = "/";
+
     } catch (error) {
       setLoading(false);
-      alert("There was an error adding the property. Please try again.");
+      setMessage({ type: "error", text: "Error adding property. Please try again." });
     }
   };
 
   return (
     <div className="max-w-xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Add New Property</h1>
+      <h1 className="text-2xl font-bold mb-4">Add New Property</h1>
+
+      {message.text && (
+        <div
+          className={`mb-4 p-2 rounded ${
+            message.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Title */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Title
@@ -85,33 +94,35 @@ const AddProperty = () => {
             value={formData.title}
             onChange={handleInputChange}
             required
+            placeholder="Enter property title"
             className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
+        {/* Image URL */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Image URL
           </label>
           <input
-            type="text"
+            type="url"
             name="image"
             value={formData.image}
             onChange={handleInputChange}
-            placeholder="Enter image URL"
+            placeholder="https://example.com/image.jpg"
             className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
+        {/* Location */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Location
           </label>
-
           <select
             name="location"
             value={formData.location}
-            onChange={handleLocationChange}
+            onChange={(e) => handleSelectChange("location", e.target.value)}
             required
             className="w-full p-2 border border-gray-300 rounded"
           >
@@ -122,6 +133,7 @@ const AddProperty = () => {
           </select>
         </div>
 
+        {/* Description */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Description
@@ -131,13 +143,15 @@ const AddProperty = () => {
             value={formData.description}
             onChange={handleInputChange}
             required
+            placeholder="Describe the property"
             className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
+        {/* Price */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Price
+            Price (in LKR)
           </label>
           <input
             type="number"
@@ -145,10 +159,13 @@ const AddProperty = () => {
             value={formData.price}
             onChange={handleInputChange}
             required
+            placeholder="Enter price"
             className="w-full p-2 border border-gray-300 rounded"
+            min="0"
           />
         </div>
 
+        {/* Property Type */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Property Type
@@ -161,11 +178,12 @@ const AddProperty = () => {
             className="w-full p-2 border border-gray-300 rounded"
           >
             <option value="">Select Type</option>
-            <option value="House">Single Family</option>
+            <option value="Single Family">Single Family</option>
             <option value="Villa">Villa</option>
           </select>
         </div>
 
+        {/* Land Size (conditionally shown) */}
         {formData.propertyType === "Land" && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -176,12 +194,15 @@ const AddProperty = () => {
               name="landSize"
               value={formData.landSize}
               onChange={handleInputChange}
-              required
+              placeholder="Enter land size in acres"
               className="w-full p-2 border border-gray-300 rounded"
+              min="0"
+              required
             />
           </div>
         )}
 
+        {/* Status */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Status
@@ -196,11 +217,10 @@ const AddProperty = () => {
             <option value="">Select Status</option>
             <option value="For Sale">For Sale</option>
             <option value="For Rent">For Rent</option>
-            <option value="Sold">Sold</option>
-            <option value="Rented">Rented</option>
           </select>
         </div>
 
+        {/* Area */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Area (sq ft)
@@ -210,16 +230,19 @@ const AddProperty = () => {
             name="area"
             value={formData.area}
             onChange={handleInputChange}
+            placeholder="Enter area in sq ft"
             required
             className="w-full p-2 border border-gray-300 rounded"
+            min="0"
           />
         </div>
 
+        {/* Submit Button */}
         <div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200"
           >
             {loading ? "Saving..." : "Save Property"}
           </button>

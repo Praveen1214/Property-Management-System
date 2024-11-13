@@ -173,10 +173,9 @@ const PropertyForm = ({ property, onClose }: PropertyFormProps) => {
               name="propertyType"
               required
               options={[
-                { value: 'House', label: 'House' },
-                { value: 'Apartment', label: 'Apartment' },
+  
                 { value: 'Villa', label: 'Villa' },
-                { value: 'Land', label: 'Land' },
+                { value: 'Single Family', label: 'Single Family' },
               ]}
             />
 
@@ -196,8 +195,7 @@ const PropertyForm = ({ property, onClose }: PropertyFormProps) => {
               options={[
                 { value: 'For Sale', label: 'For Sale' },
                 { value: 'For Rent', label: 'For Rent' },
-                { value: 'Sold', label: 'Sold' },
-                { value: 'Rented', label: 'Rented' },
+                
               ]}
             />
 

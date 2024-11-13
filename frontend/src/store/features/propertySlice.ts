@@ -48,20 +48,26 @@ export const deleteProperty = createAsyncThunk(
 
 export const searchProperties = createAsyncThunk(
   'properties/search',
-  async (filters: { location?: string; status?: string; type?: string }) => {
-    const { location, status, type } = filters;
+  async ({ query, location, status, type }: { query?: string; location?: string; status?: string; type?: string }) => {
+    // Build the query string with URLSearchParams for flexible filtering
+    const queryParams = new URLSearchParams();
     
-    // Build the query string
-    const query = new URLSearchParams();
-    if (location) query.append('location', location);
-    if (status) query.append('status', status);
-    if (type) query.append('type', type);
-
-    // Log the generated URL for debugging
-    const url = `${API_URL}/search?${query.toString()}`;
-    console.log("Request URL:", url);
-
+    if (query) queryParams.append('q', query);  // General search term
+    if (location && location !== "All Main Locations") queryParams.append('location', location);
+    if (status && status !== "All Status") queryParams.append('status', status);
+    if (type && type !== "All Types") queryParams.append('type', type);
+    
+    const url = `${API_URL}/search?${queryParams.toString()}`;
     const response = await axios.get<Property[]>(url);
+    return response.data;
+  }
+);
+
+
+export const searchPropertiesByQuery = createAsyncThunk(
+  'properties/searchByQuery',
+  async (query: string) => {
+    const response = await axios.get<Property[]>(`${API_URL}/search?q=${query}`);
     return response.data;
   }
 );

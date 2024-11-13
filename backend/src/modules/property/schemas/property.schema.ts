@@ -39,7 +39,7 @@ export class Property {
   @Prop({ required: true, enum: ['Single Family', 'Villa'] })
   propertyType: string;
 
-  @Prop({ required: true, enum: ['For Sale', 'For Rent'] })
+  @Prop({ required: true, enum: ['For Sale', 'For Rent',] })
   status: string;
 
   @Prop({ required: true })
